@@ -464,7 +464,7 @@
       overlay.style.display = "flex";
   
       try {
-        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         input = audioContext.createMediaStreamSource(stream);
         processor = audioContext.createScriptProcessor(4096, 1, 1);
@@ -543,9 +543,9 @@
     }
 
     function startApp() {
-  document.getElementById("welcomeBox").style.display = "none";
+      document.getElementById("welcomeBox").style.display = "none";
   document.getElementById("mainContent").classList.remove("blur-background");
-  showMicroHelp(); // ✅ Affiche la bulle micro
+  showMicroHelp(); // Affiche la bulle micro
 }
 
 function showMicroHelp() {
