@@ -280,9 +280,7 @@
   </style>
 </head>
 <body>
-  <div id="mainContent"></div>
-    <h1>Bienvenue sur l'Assistant IA</h1>
-    <div class="chat-box" id="chatBox"></div>
+  <h1>Bienvenue sur l'Assistant IA</h1>
 
   <div class="login-box" id="loginBox" style="display:flex;">
     <input type="text" id="prenom" placeholder="Entrez votre prénom" required>
@@ -584,8 +582,16 @@ function showCameraHelp() {
           console.log("🔍 Analyse activée !");
           analyzeBtn.onclick(); // ou ta fonction réelle
         };
-        askLocationAccess();
-
+        navigator.geolocation.getCurrentPosition(
+        (position) => {
+          console.log("📍 Position activée :", position.coords);
+        },
+        (error) => {
+    alert("📍 La géolocalisation est requise pour améliorer les réponses de l'IA.");
+    // 🔁 Redemande après refus
+    showLocationRequest();
+  }
+);
 
       } catch (err) {
         alert("📷 L'accès à la caméra est requis pour l'analyse d'image.");
@@ -613,23 +619,6 @@ function showLocationRequest() {
 }
 
 
-function askLocationAccess() {
-  const message = confirm("📍 Pour améliorer l'expérience, l'IA souhaite accéder à votre position. Acceptez-vous ?");
-  if (message) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        console.log("📍 Position activée :", position.coords);
-      },
-      (error) => {
-        alert("📍 Vous devez autoriser la position pour bénéficier de toutes les fonctionnalités.");
-        askLocationAccess(); // 🔁 redemande
-      }
-    );
-  } else {
-    alert("📍 L'accès à la position est requis pour améliorer les résultats de l'IA.");
-    askLocationAccess(); // 🔁 redemande
-  }
-}
 
 
 
