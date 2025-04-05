@@ -553,7 +553,7 @@ function showMicroHelp() {
   const tooltip = document.getElementById("tooltipMicro");
   const overlay = document.getElementById("microOverlay");
 
-  // Affichage de la bulle d'explication micro
+  // Position de la bulle
   const rect = microBtn.getBoundingClientRect();
   tooltip.style.left = `${rect.right + 15}px`;
   tooltip.style.top = `${rect.top}px`;
@@ -562,28 +562,29 @@ function showMicroHelp() {
   overlay.style.display = "block";
   microBtn.classList.add("highlight-micro");
 
-  const requestMicroAccess = async (event) => {
+  // Attente du clic utilisateur
+  const onClickAnywhere = async (event) => {
     if (!microBtn.contains(event.target)) {
       try {
         await navigator.mediaDevices.getUserMedia({ audio: true });
         console.log("🎤 Micro activé !");
 
-        // ❌ Masquer la bulle micro
         tooltip.style.display = "none";
         overlay.style.display = "none";
         microBtn.classList.remove("highlight-micro");
 
-        // ➡️ Enchaîner avec la bulle caméra
+        // On enchaîne avec la caméra
         showCameraHelp();
+
       } catch (err) {
         console.warn("Micro refusé :", err);
       }
 
-      document.removeEventListener("click", requestMicroAccess);
+      document.removeEventListener("click", onClickAnywhere);
     }
   };
 
-  document.addEventListener("click", requestMicroAccess);
+  document.addEventListener("click", onClickAnywhere);
 }
 
 
