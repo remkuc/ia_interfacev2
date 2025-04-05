@@ -618,21 +618,34 @@ function showLocationRequest() {
 
 function askLocationAccess() {
   const accept = confirm("📍 Pour améliorer la précision de ses réponses, l'IA souhaite accéder à votre position. Souhaitez-vous autoriser l'accès ?");
-  if (accept) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        console.log("📍 Position activée :", position.coords);
-      },
-      (error) => {
-        alert("📍 Vous devez autoriser la position pour utiliser toutes les fonctionnalités.");
-        askLocationAccess(); // 🔁 redemande si refusée
-      }
-    );
-  } else {
+  
+  if (!accept) {
     alert("📍 L'accès à la localisation est requis pour optimiser les réponses de l'IA.");
-    askLocationAccess(); // 🔁 redemande si refusée
+    return askLocationAccess(); // relance si refus
   }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      // ✅ Succès — on ne redemande pas
+      console.log("📍 Position activée :", position.coords);
+    },
+    (error) => {
+      // ⚠️ On vérifie la vraie erreur
+      if (error.code === error.PERMISSION_DENIED) {
+        alert("📍 Vous avez refusé l'accès à la position. Merci de l'activer pour continuer.");
+        askLocationAccess(); // 🔁 redemande
+      } else {
+        alert("📍 Erreur lors de l'accès à la position : " + error.message);
+        // On ne redemande pas si ce n'est pas un refus clair
+      }
+    },
+    {
+      timeout: 10000, // max 10 sec d'attente
+      enableHighAccuracy: true // meilleure précision
+    }
+  );
 }
+
 
 
 
