@@ -280,7 +280,10 @@
   </style>
 </head>
 <body>
-  <h1>Bienvenue sur l'Assistant IA</h1>
+  <div id="headerContainer">
+    <h1>Bienvenue sur l'Assistant IA</h1>
+  </div>
+  
 
   <div class="login-box" id="loginBox" style="display:flex;">
     <input type="text" id="prenom" placeholder="Entrez votre prénom" required>
@@ -333,6 +336,11 @@
     let buffer = [];
     let isRecording = false;
     let videoStream;
+    async function hasCamera() {
+  const devices = await navigator.mediaDevices.enumerateDevices();
+  return devices.some(device => device.kind === "videoinput");
+}
+
   
     async function login() {
   const prenom = document.getElementById("prenom").value.trim();
@@ -348,6 +356,8 @@
   chatBox.style.display = "flex";
   document.getElementById("mainContent").style.display = "block"; // 👈 assure que c'est visible
   document.getElementById("mainContent").classList.add("blur-background");
+  document.getElementById("headerContainer").classList.add("blur-background");
+
   document.getElementById("welcomeBox").style.display = "block";
 
 
@@ -500,6 +510,8 @@
     function startApp() {
       document.getElementById("welcomeBox").style.display = "none";
   document.getElementById("mainContent").classList.remove("blur-background");
+  document.getElementById("headerContainer").classList.remove("blur-background");
+
   setTimeout(showMicroHelp, 100); // délai très court pour afficher après la fermeture de la box
 
 }
@@ -553,10 +565,17 @@ function showMicroHelp() {
 
 
 
-function showCameraHelp() {
+async function showCameraHelp() {
   const cameraBtn = document.getElementById("cameraBtn");
   const tooltip = document.getElementById("tooltipCamera");
   const overlay = document.getElementById("microOverlay");
+
+  const hasCam = await hasCamera();
+  if (!hasCam) {
+    alert("❌ Aucune caméra détectée sur cet appareil. L'analyse visuelle est désactivée.");
+    cameraBtn.classList.add("disabled-button");
+    return;
+  }
 
   const rect = cameraBtn.getBoundingClientRect();
   tooltip.style.left = `${rect.right + 15}px`;
@@ -566,7 +585,6 @@ function showCameraHelp() {
   overlay.style.display = "block";
   cameraBtn.classList.add("highlight-micro");
 
-  // 🔁 Attente de clic utilisateur pour demander la caméra
   const requestCameraAccess = async (event) => {
     if (!cameraBtn.contains(event.target)) {
       try {
@@ -577,25 +595,16 @@ function showCameraHelp() {
         overlay.style.display = "none";
         cameraBtn.classList.remove("highlight-micro", "disabled-button");
 
-        // ✅ Active le bouton après autorisation
         cameraBtn.onclick = () => {
-          console.log("🔍 Analyse activée !");
-          analyzeBtn.onclick(); // ou ta fonction réelle
+          analyzeBtn.onclick();
         };
-        askLocationAccess(); // ✅ affiche le message avant de demander
 
-        (error) => {
-    alert("📍 La géolocalisation est requise pour améliorer les réponses de l'IA.");
-    // 🔁 Redemande après refus
-    showLocationRequest();
-  };
-
+        requestLocationConsent(); // ⬅️ Appelle la demande de position
 
       } catch (err) {
         alert("📷 L'accès à la caméra est requis pour l'analyse d'image.");
         showCameraHelp(); // 🔁 redemande la caméra
       }
-
 
       document.removeEventListener("click", requestCameraAccess);
     }
@@ -604,35 +613,33 @@ function showCameraHelp() {
   document.addEventListener("click", requestCameraAccess);
 }
 
+
 function showLocationRequest() {
-  const confirmMsg = confirm("📍 Pour améliorer l'expérience et la précision de l'IA, autorisez l'accès à votre position. Voulez-vous continuer ?");
-  
-  if (!confirmMsg) {
-    alert("📍 L'accès à la localisation est requis pour continuer.");
-    return showLocationRequest(); // 🔁 relance si refusé à la boîte de confirmation
+  const proceed = confirm("📍 Pour améliorer l'expérience, autorisez l'accès à votre position. Voulez-vous continuer ?");
+  if (!proceed) {
+    alert("📍 Sans localisation, certaines fonctionnalités seront limitées.");
+    return;
   }
 
   navigator.geolocation.getCurrentPosition(
-    (position) => {
-      console.log("📍 Position activée :", position.coords);
+    (pos) => {
+      console.log("✅ Position reçue :", pos.coords);
+      // Tu peux ici activer des fonctions qui dépendent de la position
     },
-    (error) => {
-      if (error.code === error.PERMISSION_DENIED) {
-        alert("📍 Vous avez refusé l'accès à la position. Merci de l'activer pour continuer.");
-        showLocationRequest(); // 🔁 seulement si refus
+    (err) => {
+      if (err.code === err.PERMISSION_DENIED) {
+        alert("❌ Vous avez refusé la géolocalisation. Merci d'accepter pour bénéficier de toutes les fonctionnalités.");
+        showLocationRequest(); // 🔁 redemande si refus explicite
       } else {
-        console.warn("Erreur de géolocalisation : ", error.message);
-        alert("📍 Impossible de récupérer la position (raison technique). Vous pouvez continuer, mais certaines fonctions seront limitées.");
-        // ❌ NE PAS relancer en boucle ici
+        console.warn("Erreur de géolocalisation :", err);
+        alert("⚠️ Position non disponible pour des raisons techniques.");
+        // pas de relance ici pour éviter la boucle
       }
     },
-    {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 0
-    }
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
   );
 }
+
 
 function askLocationAccess() {
   const accept = confirm("📍 Pour améliorer la précision de ses réponses, l'IA souhaite accéder à votre position. Souhaitez-vous autoriser l'accès ?");
@@ -664,6 +671,28 @@ function askLocationAccess() {
   );
 }
 
+function requestLocationConsent() {
+  const consent = confirm("📍 Pour améliorer les réponses de l'IA, acceptez de partager votre position.");
+  if (!consent) {
+    alert("⚠️ Sans position, certaines suggestions peuvent être moins précises.");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      console.log("✅ Position obtenue :", position.coords);
+    },
+    (err) => {
+      if (err.code === err.PERMISSION_DENIED) {
+        alert("📍 Vous avez refusé l'accès à la position. Veuillez l'autoriser pour profiter pleinement de l'IA.");
+        requestLocationConsent(); // 🔁 redemande
+      } else {
+        alert("⚠️ Erreur technique lors de l'accès à la position.");
+      }
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  );
+}
 
 
 
