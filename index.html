@@ -340,10 +340,13 @@
   const devices = await navigator.mediaDevices.enumerateDevices();
   return devices.some(device => device.kind === "videoinput");
 }
+let userPrenom = ""; // 👈 Variable accessible partout dans ton script
 
   
     async function login() {
   const prenom = document.getElementById("prenom").value.trim();
+  userPrenom = prenom; // 👈 Enregistre le prénom pour l'utiliser ailleurs
+
   if (!prenom) {
   alert("Veuillez entrer votre prénom.");
   return;
