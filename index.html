@@ -582,16 +582,14 @@ function showCameraHelp() {
           console.log("🔍 Analyse activée !");
           analyzeBtn.onclick(); // ou ta fonction réelle
         };
-        navigator.geolocation.getCurrentPosition(
-        (position) => {
-          console.log("📍 Position activée :", position.coords);
-        },
+        askLocationAccess(); // ✅ affiche le message avant de demander
+
         (error) => {
     alert("📍 La géolocalisation est requise pour améliorer les réponses de l'IA.");
     // 🔁 Redemande après refus
     showLocationRequest();
-  }
-);
+  };
+
 
       } catch (err) {
         alert("📷 L'accès à la caméra est requis pour l'analyse d'image.");
@@ -618,12 +616,29 @@ function showLocationRequest() {
   );
 }
 
+function askLocationAccess() {
+  const accept = confirm("📍 Pour améliorer la précision de ses réponses, l'IA souhaite accéder à votre position. Souhaitez-vous autoriser l'accès ?");
+  if (accept) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        console.log("📍 Position activée :", position.coords);
+      },
+      (error) => {
+        alert("📍 Vous devez autoriser la position pour utiliser toutes les fonctionnalités.");
+        askLocationAccess(); // 🔁 redemande si refusée
+      }
+    );
+  } else {
+    alert("📍 L'accès à la localisation est requis pour optimiser les réponses de l'IA.");
+    askLocationAccess(); // 🔁 redemande si refusée
+  }
+}
 
 
 
 
 
-  </script>
+</script>
   
 <div class="micro-overlay" id="microOverlay"></div>
 <div class="tooltip-micro" id="tooltipMicro" style="display:none;">
