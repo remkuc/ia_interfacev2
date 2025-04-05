@@ -599,7 +599,7 @@ async function showCameraHelp() {
           analyzeBtn.onclick();
         };
 
-        requestLocationConsent(); // ⬅️ Appelle la demande de position
+     
 
       } catch (err) {
         alert("📷 L'accès à la caméra est requis pour l'analyse d'image.");
@@ -612,37 +612,6 @@ async function showCameraHelp() {
 
   document.addEventListener("click", requestCameraAccess);
 }
-
-
-
-
-
-
-function requestLocationConsent() {
-  const consent = confirm("📍 Pour améliorer les réponses de l'IA, acceptez de partager votre position.");
-  if (!consent) {
-    alert("⚠️ Sans position, certaines suggestions peuvent être moins précises.");
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      console.log("✅ Position obtenue :", position.coords);
-      // ✅ Rien à faire de plus ici, succès
-    },
-    (err) => {
-      if (err.code === err.PERMISSION_DENIED) {
-        alert("📍 Vous avez refusé l'accès à la position. Merci d'autoriser pour continuer.");
-        setTimeout(requestLocationConsent, 1000); // 🔁 relance douce
-      } else {
-        alert("⚠️ Erreur lors de l'accès à la position : " + err.message);
-      }
-    },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-  );
-}
-
-
 
 
 
