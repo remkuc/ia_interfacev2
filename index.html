@@ -284,7 +284,6 @@
 
   <div class="login-box" id="loginBox" style="display:flex;">
     <input type="text" id="prenom" placeholder="Entrez votre prénom" required>
-    <input type="password" id="mdp" placeholder="Créez un mot de passe" required>
     <button onclick="login()">Se connecter</button>
   </div>
 
@@ -337,12 +336,11 @@
   
     async function login() {
   const prenom = document.getElementById("prenom").value.trim();
-  const mdp = document.getElementById("mdp").value.trim();
+  if (!prenom) {
+  alert("Veuillez entrer votre prénom.");
+  return;
+}
 
-  if (!prenom || !mdp) {
-    alert("Veuillez remplir tous les champs.");
-    return;
-  }
 
   // On cache la connexion et affiche le chat
   localStorage.setItem("prenom", prenom);
