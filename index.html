@@ -501,7 +501,8 @@
     function startApp() {
       document.getElementById("welcomeBox").style.display = "none";
   document.getElementById("mainContent").classList.remove("blur-background");
-  showMicroHelp(); // Affiche la bulle micro
+  setTimeout(showMicroHelp, 100); // délai très court pour afficher après la fermeture de la box
+
 }
 
 function showMicroHelp() {
@@ -540,7 +541,10 @@ function showMicroHelp() {
     }
   };
 
-  document.addEventListener("click", onClickAnywhere);
+  setTimeout(() => {
+  document.addEventListener("click", onClickAnywhere, { once: true });
+}, 0);
+
 }
 
 
