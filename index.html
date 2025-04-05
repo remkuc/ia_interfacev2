@@ -605,13 +605,31 @@ function showCameraHelp() {
 }
 
 function showLocationRequest() {
+  const confirmMsg = confirm("📍 Pour améliorer l'expérience et la précision de l'IA, autorisez l'accès à votre position. Voulez-vous continuer ?");
+  
+  if (!confirmMsg) {
+    alert("📍 L'accès à la localisation est requis pour continuer.");
+    return showLocationRequest(); // 🔁 relance si refusé à la boîte de confirmation
+  }
+
   navigator.geolocation.getCurrentPosition(
     (position) => {
       console.log("📍 Position activée :", position.coords);
     },
     (error) => {
-      alert("📍 Vous devez autoriser la position pour utiliser toutes les fonctionnalités.");
-      showLocationRequest(); // 🔁 relance encore
+      if (error.code === error.PERMISSION_DENIED) {
+        alert("📍 Vous avez refusé l'accès à la position. Merci de l'activer pour continuer.");
+        showLocationRequest(); // 🔁 seulement si refus
+      } else {
+        console.warn("Erreur de géolocalisation : ", error.message);
+        alert("📍 Impossible de récupérer la position (raison technique). Vous pouvez continuer, mais certaines fonctions seront limitées.");
+        // ❌ NE PAS relancer en boucle ici
+      }
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
     }
   );
 }
