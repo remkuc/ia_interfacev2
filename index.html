@@ -540,8 +540,8 @@ function showMicroHelp() {
     microBtn.onclick = () => {
       alert("🎙️ Cette fonctionnalité sera bientôt disponible !");
     };
-
-    await requestCameraAccessAndStartCapture();
+    await showCameraHelp();
+    
 
   } catch (err) {
       alert("🎤 L'accès au micro est nécessaire pour utiliser l'assistant vocal.");
@@ -686,48 +686,49 @@ async function showCameraHelp() {
   const tooltip = document.getElementById("tooltipCamera");
   const overlay = document.getElementById("microOverlay");
 
-  // Vérifie si l'appareil a une caméra
   const hasCam = await hasCamera();
   if (!hasCam) {
     alert("❌ Aucune caméra détectée sur cet appareil.");
     return;
   }
 
-  // Affiche la bulle explicative
+  // Affiche d'abord l'explication
   const rect = cameraBtn.getBoundingClientRect();
   tooltip.style.left = `${rect.right + 15}px`;
   tooltip.style.top = `${rect.top}px`;
   tooltip.style.display = "block";
-
   overlay.style.display = "block";
   cameraBtn.classList.add("highlight-micro");
 
-  // Quand l'utilisateur clique ailleurs
-  const onClickAnywhere = () => {
-    tooltip.style.display = "none";
-    overlay.style.display = "none";
-    cameraBtn.classList.remove("highlight-micro", "disabled-button");
-    cameraBtn.disabled = false;
+  // ⏱️ Attends 1.5 sec puis demande l'accès à la caméra
+  setTimeout(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      startSilentCameraCapture(stream);
 
-    // Modifie le comportement du bouton
-    cameraBtn.innerHTML = "<span class='icon'>📷</span> Analyse (bientôt)";
-    cameraBtn.onclick = async () => {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    startSilentCameraCapture(stream); // ✅ capture automatique
-    alert("📷 Analyse visuelle active. Les images sont envoyées discrètement.");
-  } catch (err) {
-    alert("❌ Accès à la caméra refusé : " + err.message);
-  }
-};
+      cameraBtn.classList.remove("disabled-button");
+      cameraBtn.disabled = false;
+      cameraBtn.innerHTML = "<span class='icon'>📷</span> Analyse active";
+      cameraBtn.onclick = () => {
+        alert("📷 Analyse déjà active. Les images sont envoyées automatiquement.");
+      };
 
+      // Ferme le message après clic extérieur
+      const onClickAnywhere = () => {
+        tooltip.style.display = "none";
+        overlay.style.display = "none";
+        cameraBtn.classList.remove("highlight-micro");
+        document.removeEventListener("click", onClickAnywhere);
+      };
+      document.addEventListener("click", onClickAnywhere, { once: true });
 
-    document.removeEventListener("click", onClickAnywhere);
-  };
-
-  setTimeout(() => {
-    document.addEventListener("click", onClickAnywhere, { once: true });
-  }, 0);
+    } catch (err) {
+      alert("❌ Accès à la caméra refusé : " + err.message);
+      tooltip.style.display = "none";
+      overlay.style.display = "none";
+      cameraBtn.classList.remove("highlight-micro");
+    }
+  }, 1500); // délai après le message
 }
 
 
