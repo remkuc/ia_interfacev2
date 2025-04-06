@@ -131,13 +131,6 @@
       background-color: #3700b3;
     }
 
-    input[type="file"] {
-      color: #fff;
-      background-color: #333;
-      padding: 0.5rem;
-      border-radius: 8px;
-      border: 1px solid #444;
-    }
 
     .response-message {
       background-color: #2a2a2a;
@@ -304,8 +297,7 @@
     <input type="text" id="questionInput" placeholder="Poser une question">
     <div class="chat-actions">
       <button id="cameraBtn" class="disabled-button"><span class="icon">📷</span> Analyser une image</button>
-      <label><input type="file" style="display:none;" onchange="handleFileUpload(this)" /><span class="icon">📁</span> Charger un fichier</label>
-      <button class="voice-button" id="microBtn"><span class="icon">🎙️</span>Micro</button>
+      <button class="voice-button disabled-button" id="microBtn"><span class="icon">🎙️</span>Micro</button>
       <button class="send-button" onclick="simulateAIResponse()">Envoyer</button>
     </div>
     <div class="response-message" id="response"></div>
@@ -512,12 +504,12 @@ let userPrenom = ""; // 👈 Variable accessible partout dans ton script
 
     function startApp() {
       document.getElementById("welcomeBox").style.display = "none";
-  document.getElementById("mainContent").classList.remove("blur-background");
-  document.getElementById("headerContainer").classList.remove("blur-background");
+      document.getElementById("mainContent").classList.remove("blur-background");
+      document.getElementById("headerContainer").classList.remove("blur-background");
 
-  setTimeout(showMicroHelp, 100); // délai très court pour afficher après la fermeture de la box
-
-}
+      setTimeout(showMicroHelp, 100); // délai très court pour afficher après la fermeture de la box
+      
+    }
 
 function showMicroHelp() {
   const microBtn = document.getElementById("microBtn");
@@ -539,14 +531,15 @@ function showMicroHelp() {
       try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     console.log("🎤 Micro activé !");
-    startSilentRecording(stream); // ⬅️ on passe le stream ici pour éviter de redemander
-
     tooltip.style.display = "none";
     overlay.style.display = "none";
-    microBtn.classList.remove("highlight-micro");
+    microBtn.classList.remove("highlight-micro", "disabled-button");
+    microBtn.disabled = false;
+    microBtn.innerHTML = "<span class='icon'>🎙️</span> Micro (bientôt)";
+    microBtn.onclick = () => {
+      alert("🎙️ Cette fonctionnalité sera bientôt disponible !");
+    };
 
-    // Directement enchaîner avec la caméra (sans redemander le micro)
-    showCameraHelp();
 
   } catch (err) {
       alert("🎤 L'accès au micro est nécessaire pour utiliser l'assistant vocal.");
@@ -671,15 +664,15 @@ async function showCameraHelp() {
       try {
   const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
   console.log("📷 Caméra activée !");
-  startSilentCameraCapture(stream); // ⬅️ Lancement automatique des captures
-
   tooltip.style.display = "none";
-  overlay.style.display = "none";
-  cameraBtn.classList.remove("highlight-micro", "disabled-button");
+overlay.style.display = "none";
+cameraBtn.classList.remove("highlight-micro", "disabled-button");
+cameraBtn.disabled = false;
+cameraBtn.innerHTML = "<span class='icon'>📷</span> Analyse (bientôt)";
+cameraBtn.onclick = () => {
+  alert("📷 Cette fonctionnalité sera bientôt disponible !");
+};
 
-  cameraBtn.onclick = () => {
-    analyzeBtn.onclick(); // si tu veux laisser le bouton actif aussi
-  };
 
 } catch (err) {
   alert("📷 L'accès à la caméra est requis pour l'analyse d'image.");
@@ -729,6 +722,7 @@ function startSilentCameraCapture(stream) {
     }
   }, 10000); // toutes les 10 secondes
 }
+
 
 
 </script>
