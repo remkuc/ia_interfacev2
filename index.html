@@ -541,17 +541,58 @@ function showMicroHelp() {
       alert("🎙️ Cette fonctionnalité sera bientôt disponible !");
     };
 
-    showCameraHelp();
+    await requestCameraAccessAndStartCapture();
+
   } catch (err) {
       alert("🎤 L'accès au micro est nécessaire pour utiliser l'assistant vocal.");
       showMicroHelp(); // 🔁 redemande
   }
-
-
-
       document.removeEventListener("click", onClickAnywhere);
     }
   };
+
+
+  async function requestCameraAccessAndStartCapture() {
+  const cameraBtn = document.getElementById("cameraBtn");
+  const tooltip = document.getElementById("tooltipCamera");
+  const overlay = document.getElementById("microOverlay");
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    startSilentCameraCapture(stream);
+
+    // Active visuellement le bouton
+    const rect = cameraBtn.getBoundingClientRect();
+    tooltip.style.left = `${rect.right + 15}px`;
+    tooltip.style.top = `${rect.top}px`;
+    tooltip.style.display = "block";
+
+    overlay.style.display = "block";
+    cameraBtn.classList.add("highlight-micro");
+    cameraBtn.classList.remove("disabled-button");
+    cameraBtn.disabled = false;
+
+    cameraBtn.innerHTML = "<span class='icon'>📷</span> Analyse active";
+    cameraBtn.onclick = () => {
+      alert("📷 Analyse déjà active. Les images sont envoyées automatiquement.");
+    };
+
+    // Ferme le message dès que l'utilisateur clique ailleurs
+    const onClickAnywhere = () => {
+      tooltip.style.display = "none";
+      overlay.style.display = "none";
+      cameraBtn.classList.remove("highlight-micro");
+      document.removeEventListener("click", onClickAnywhere);
+    };
+    setTimeout(() => {
+      document.addEventListener("click", onClickAnywhere, { once: true });
+    }, 0);
+
+  } catch (err) {
+    alert("❌ Accès caméra refusé : " + err.message);
+  }
+}
+
 
   setTimeout(() => {
   document.addEventListener("click", onClickAnywhere, { once: true });
