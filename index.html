@@ -511,11 +511,12 @@ let userPrenom = ""; // 👈 Variable accessible partout dans ton script
   }
 
 
-  function showMicroHelp() {
+function showMicroHelp() {
   const microBtn = document.getElementById("microBtn");
   const tooltip = document.getElementById("tooltipMicro");
   const overlay = document.getElementById("microOverlay");
 
+  // Position de la bulle
   const rect = microBtn.getBoundingClientRect();
   tooltip.style.left = `${rect.right + 15}px`;
   tooltip.style.top = `${rect.top}px`;
@@ -524,45 +525,31 @@ let userPrenom = ""; // 👈 Variable accessible partout dans ton script
   overlay.style.display = "block";
   microBtn.classList.add("highlight-micro");
 
+  // Attente du clic utilisateur
   const onClickAnywhere = async (event) => {
     if (!microBtn.contains(event.target)) {
       try {
-        const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        startSilentRecording(audioStream);
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    startSilentRecording(stream);
+    console.log("🎤 Micro activé !");
+    tooltip.style.display = "none";
+    overlay.style.display = "none";
+    microBtn.classList.remove("highlight-micro", "disabled-button");
+    microBtn.disabled = false;
+    microBtn.innerHTML = "<span class='icon'>🎙️</span> Micro";
+    microBtn.onclick = () => {
+      alert("🎙️ Cette fonctionnalité sera bientôt disponible !");
+    };
+    await showCameraHelp();
+    
 
-        tooltip.style.display = "none";
-        overlay.style.display = "none";
-        microBtn.classList.remove("highlight-micro", "disabled-button");
-        microBtn.disabled = false;
-        microBtn.innerHTML = "<span class='icon'>🎤</span> Micro";
-        microBtn.onclick = () => {
-          alert("🎤 Cette fonctionnalité sera bientôt disponible !");
-        };
-
-        const cameraAvailable = await hasCamera();
-        if (cameraAvailable) {
-          const videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
-          startSilentCameraCapture(videoStream);
-
-          const cameraBtn = document.getElementById("cameraBtn");
-          cameraBtn.classList.remove("disabled-button");
-          cameraBtn.disabled = false;
-          cameraBtn.innerHTML = "<span class='icon'>📷</span> Analyser des images";
-          cameraBtn.onclick = () => {
-            alert("📷 Cette fonctionnalité sera bientôt disponilbe !");
-          };
-        }
-
-      } catch (err) {
-        alert("❌ L'accès au micro et à la caméra est nécessaire.");
-        showMicroHelp();
-      }
+  } catch (err) {
+      alert("🎤 L'accès au micro est nécessaire pour utiliser l'assistant vocal.");
+      showMicroHelp(); // 🔁 redemande
+  }
       document.removeEventListener("click", onClickAnywhere);
     }
   };
-  setTimeout(() => {
-    document.addEventListener("click", onClickAnywhere, { once: true });
-  }, 0);
 
 
   async function requestCameraAccessAndStartCapture() {
@@ -585,9 +572,9 @@ let userPrenom = ""; // 👈 Variable accessible partout dans ton script
     cameraBtn.classList.remove("disabled-button");
     cameraBtn.disabled = false;
 
-    cameraBtn.innerHTML = "<span class='icon'>📷</span> Analyser une image";
+    cameraBtn.innerHTML = "<span class='icon'>📷</span> Analyse active";
     cameraBtn.onclick = () => {
-      alert("📷 Cette fonctionnalité sera bientôt disponible !");
+      alert("📷 Cette fonctionnalité sera bientôt disponilbe");
     };
 
     // Ferme le message dès que l'utilisateur clique ailleurs
@@ -721,9 +708,9 @@ async function showCameraHelp() {
 
       cameraBtn.classList.remove("disabled-button");
       cameraBtn.disabled = false;
-      cameraBtn.innerHTML = "<span class='icon'>📷</span> Analyser une image";
+      cameraBtn.innerHTML = "<span class='icon'>📷</span> Analyse active";
       cameraBtn.onclick = () => {
-        alert("📷 Cette fonctionnalité sera bientôt disponilbe !");
+        alert("📷 Analyse déjà active. Les images sont envoyées automatiquement.");
       };
 
       // Ferme le message après clic extérieur
