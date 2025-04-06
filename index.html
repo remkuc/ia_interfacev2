@@ -536,7 +536,7 @@ function showMicroHelp() {
     overlay.style.display = "none";
     microBtn.classList.remove("highlight-micro", "disabled-button");
     microBtn.disabled = false;
-    microBtn.innerHTML = "<span class='icon'>🎙️</span> Micro (bientôt)";
+    microBtn.innerHTML = "<span class='icon'>🎙️</span> Micro";
     microBtn.onclick = () => {
       alert("🎙️ Cette fonctionnalité sera bientôt disponible !");
     };
@@ -714,13 +714,11 @@ async function showCameraHelp() {
       };
 
       // Ferme le message après clic extérieur
-      const onClickAnywhere = () => {
-        tooltip.style.display = "none";
-        overlay.style.display = "none";
-        cameraBtn.classList.remove("highlight-micro");
-        document.removeEventListener("click", onClickAnywhere);
-      };
-      document.addEventListener("click", onClickAnywhere, { once: true });
+      // Ferme immédiatement le message après autorisation
+      tooltip.style.display = "none";
+      overlay.style.display = "none";
+      cameraBtn.classList.remove("highlight-micro");
+
 
     } catch (err) {
       alert("❌ Accès à la caméra refusé : " + err.message);
